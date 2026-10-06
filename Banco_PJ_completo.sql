@@ -2,10 +2,6 @@
 -- Script unico: cria o banco do zero, as tabelas com chaves estrangeiras dentro do CREATE TABLE, e insere dados de exemplo.
 -- Executar no SQL Server Management Studio (to usando a 2022 mas acho q a 2019 funciona tambem) selecionar tudo e executar (F5).
 --
--- REAIS: clubes, cidades, estadios e capacidades (Serie A/B 2026).
---        Anos de fundacao: conferir antes de apresentar.
--- FICTICIOS: jogadores, arbitros, placares das partidas e a
---        parceria de IdAfiliado (exemplo hipotetico).
 
 -- Faz Recomecar do zero (permite rodar o script varias vezes)
 USE master;
@@ -43,7 +39,7 @@ CREATE TABLE Estadio
 (
     IdEstadio           INT PRIMARY KEY IDENTITY(1,1),
     Nome                VARCHAR(60),
-    Fundacao            INT,   -- ano da fundacao
+    Fundacao            INT,   -- ano da fundaçao
     Cidade              VARCHAR(40),
     CapacidadeCasa      INT,
     CapacidadeVisitante INT,
@@ -54,7 +50,7 @@ CREATE TABLE Estadio
 CREATE TABLE Clube
 (
     IdClube      INT PRIMARY KEY IDENTITY(1,1),
-    Nome         VARCHAR(20),
+    Nome         VARCHAR(30),
     Fundacao     INT NULL,
     Abreviacao   VARCHAR(3),
     Nacao        VARCHAR(30),
@@ -96,11 +92,12 @@ CREATE TABLE Partida
 GO
 
 -- 3) Inserts pra teste
--- Ordem: Campeonato > Estadio > Clube > Jogador > Partida
+-- Ordem: tem que ser na mesma ordem da criação das tabelas (Campeonato > Estadio > Clube > Jogador > partida)
 --    (a chave estrangeira so aceita Ids que ja existem)
 
 -- Campeonato (Id 1, 2, 3). Superior/Inferior entram no UPDATE logo abaixo,
 -- porque um campeonato nao pode apontar para outro que ainda nao existe.
+
 INSERT INTO Campeonato (Nome, NumeroTimes, NumeroRebaixados, NumeroPromovidos, Rodadas, IdSuperior, IdInferior)
 VALUES
 ('Serie A', 20, 4, 0, 38,   NULL, NULL),
@@ -135,7 +132,7 @@ VALUES
 ('Criciuma',             1947, 'CRI', 'Brasil', 2, 7, NULL),
 ('Juventude',            1913, 'JUV', 'Brasil', 2, 8, NULL);
 
--- Exemplo HIPOTETICO de IdAfiliado (nao e parceria real): Bahia (3) com Avai (5) como satelite
+-- Exemplo HIPOTETICO de IdAfiliado (nao e parceria real): Bahia (3) com Avai (5) como parceiros
 UPDATE Clube SET IdAfiliado = 5 WHERE IdClube = 3;
 
 -- Jogador (FICTICIOS, 1 por clube)
@@ -159,44 +156,20 @@ VALUES
 ('20260906 18:30', 7, 8, 'Paulo Mendes',    2, 3, 2);
 GO
 
--- ====== 4) Consultas ======
+-- 4) Consultas tabelas
+ -- Campeonato > Estadio > Clube > Jogador > partida)
 
--- Tabelas criadas (esperado: 5)
-SELECT name FROM sys.tables ORDER BY name;
+SELECT * From Campeonato
+SELECT * From Estadio
+SELECT * From Clube
+SELECT * From Jogador
+SELECT * From Partida
 
--- Chaves estrangeiras criadas (esperado: 9)
-SELECT name FROM sys.foreign_keys ORDER BY name;
+-- Clube com estadio
+SELECT Clube.Nome, Estadio.Nome
+FROM Clube
+JOIN Estadio ON Estadio.IdEstadio = Clube.IdEstadio;
 
--- Linhas por tabela (esperado: 3, 8, 8, 8, 4)
-SELECT 'Campeonato' AS Tabela, COUNT(*) AS Linhas FROM Campeonato
-UNION ALL SELECT 'Estadio',  COUNT(*) FROM Estadio
-UNION ALL SELECT 'Clube',    COUNT(*) FROM Clube
-UNION ALL SELECT 'Jogador',  COUNT(*) FROM Jogador
-UNION ALL SELECT 'Partida',  COUNT(*) FROM Partida;
-
--- Clubes com campeonato e estadio
-SELECT c.Nome AS Clube, camp.Nome AS Campeonato, e.Nome AS Estadio, e.CapacidadeCasa
-FROM Clube c
-JOIN Campeonato camp ON camp.IdCampeonato = c.IdCampeonato
-JOIN Estadio e       ON e.IdEstadio = c.IdEstadio;
-
--- Hierarquia das divisoes (A > B > C)
-SELECT c.Nome AS Campeonato, sup.Nome AS DivisaoAcima, inf.Nome AS DivisaoAbaixo
-FROM Campeonato c
-LEFT JOIN Campeonato sup ON sup.IdCampeonato = c.IdSuperior
-LEFT JOIN Campeonato inf ON inf.IdCampeonato = c.IdInferior;
-
--- Clube e seu afiliado
-SELECT c.Nome AS Clube, a.Nome AS Afiliado
-FROM Clube c
-JOIN Clube a ON a.IdClube = c.IdAfiliado;
-
--- Resultado de cada partida
-SELECT p.DataEHora, casa.Nome AS Casa, p.GolsCasa, p.GolsFora, fora.Nome AS Visitante
-FROM Partida p
-JOIN Clube casa ON casa.IdClube = p.IdClubeCasa
-JOIN Clube fora ON fora.IdClube = p.IdClubeVisitante
-ORDER BY p.DataEHora;
-
--- Teste da chave estrangeira: deve dar ERRO (clube 99 nao existe)
--- INSERT INTO Jogador (Nome, IdClube) VALUES ('Teste', 99);
+SELECT Clube.Nome, Partida.GolsCasa, Partida.GolsFora
+FROM Partida
+JOIN Clube ON Clube.IdClube = Partida.IdClubeCasa;
