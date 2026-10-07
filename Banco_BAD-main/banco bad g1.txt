@@ -1,0 +1,60 @@
+--CREATE DATABASE PJ; --e1
+CREAT TABLE Jogador --e2
+(
+IdJogador PRIMARY KEY IDENTITY --e3,4 (identidade 1,1 + terminar com virgula)
+Nome VARCHAR(30),
+Idade INT,
+Altura INT,
+IdClube INT, 
+Nacionalidade VARCHAR(20, --e5
+Camisa INT,
+PePreferido VARCHAR((10) --e20 
+) --e6
+CREATE CREATE --e7
+CREATE TALE --e8  (tabela clube)
+( --e9(')
+IdClube INT PRIMARY IDENTITY, --e21,22 (pk + (1,1))
+Nome VARCHAR('20'), --e10
+Fundacao INT NULL,
+Abreviacao VARCHAR(3),
+Nacao o --e11 (contem espaço)
+VARCHAR(200000000000000000000000000000000000000000000000000000000000000000000000000), --e12 (valor)
+IdCampeonato INT,
+IdEstadio INT,
+IdAfiliado INT
+);
+CREATE TABLE Estadio
+(
+IdEstadio INT KEY IDENTITY, --e13 (pk + (1,1))
+Nome VARCHAR(-60), --e14
+Fundacao INT, -- nao eh erro mas eh o ano da fundação
+Cidade VARCHAR(40),
+CapacidadeCasa INT,
+CapacidadeVisitante INT,
+PartidasJogadas INT,
+VitoriasCasa INT
+);
+CREATE TABLE Estadio --e23 (tabela da partida)
+(
+IdPartida INT PRIMARY KEY IDENTITY,
+DataEHora DATETIME,
+IdClubeCasa INT CREATE, --e15
+IdClubeVisitante INT,
+NomeArbitro VARCHAR(30),
+IdCampeonato INT,
+GolsCasa INT,
+GolsCasa INT, --e17
+GolsFora INT
+);
+'' --e16
+CREATE TABLE Campeonato
+(
+IdCampeonato INT PRIMARY KEY, -- erro ta sem identidade sendo q ta relacionando com a partida (IdCampeonato)
+Nome VARCHAR(20),
+NumeroTimes INT(8;), --e18
+NumeroRebaixados INT,
+NumeroPromovidos INT,
+Rodadas INT INT, --e19
+IdSuperior INT,
+IdInferior INT
+);
